@@ -1,0 +1,70 @@
+name: omnisight
+
+# App settings (OpenAI key, models, JWT, CORS…) come from backend/.env — see backend/.env.example.
+# These connection settings point at the containers below and override backend/.env.
+x-backend-env: &backend-env
+  DATABASE_URL: postgresql://omnisight:omnisight@db:5432/omnisight
+  S3_ENDPOINT: http://rustfs:9000
+  S3_ACCESS_KEY: rustfsadmin
+  S3_SECRET_KEY: rustfsadmin
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: omnisight
+      POSTGRES_PASSWORD: omnisight
+      POSTGRES_DB: omnisight
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omnisight"]
+      interval: 3s
+      retries: 20
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+    ports: ["9000:9000", "9001:9001"]
+    volumes: [rustfsdata:/data]
+
+  backend:
+    build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file: ./backend/.env
+    environment: *backend-env
+    ports: ["8000:8000"]
+    volumes: ["./backend:/app"]
+    depends_on:
+      db: { condition: service_healthy }
+      rustfs: { condition: service_started }
+
+  worker:
+    build: ./backend
+    command: watchfiles --filter python "python -m app.worker" app
+    env_file: ./backend/.env
+    environment: *backend-env
+    volumes: ["./backend:/app"]
+    depends_on:
+      db: { condition: service_healthy }
+      rustfs: { condition: service_started }
+
+  frontend:
+    build: ./frontend
+    command: sh -c "npm install && npm run dev"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      WATCHPACK_POLLING: "true"
+    ports: ["3000:3000"]
+    volumes: ["./frontend:/app", "frontend_node_modules:/app/node_modules"]
+    depends_on: [backend]
+
+volumes:
+  pgdata:
+  rustfsdata:
+  frontend_node_modules:
