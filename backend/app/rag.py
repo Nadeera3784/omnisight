@@ -1,4 +1,5 @@
 """Retrieval-augmented answers over a user's video knowledge base."""
+
 from . import ai, config, media
 from .db import get_conn
 
@@ -32,31 +33,36 @@ def retrieve(user_id, query: str, video_id=None, k: int = config.TOP_K) -> list[
         rows = conn.execute(sql, params).fetchall()
     sources = []
     for i, r in enumerate(rows, start=1):
-        sources.append({
-            "n": i,
-            "video_id": str(r["video_id"]),
-            "title": r["title"],
-            "start": r["start_sec"],
-            "end": r["end_sec"],
-            "timestamp": fmt_ts(r["start_sec"]),
-            "text": r["text"],
-            "score": round(float(r["score"]), 4),
-            "youtube_url": media.youtube_link(r["youtube_url"], r["start_sec"]),
-        })
+        sources.append(
+            {
+                "n": i,
+                "video_id": str(r["video_id"]),
+                "title": r["title"],
+                "start": r["start_sec"],
+                "end": r["end_sec"],
+                "timestamp": fmt_ts(r["start_sec"]),
+                "text": r["text"],
+                "score": round(float(r["score"]), 4),
+                "youtube_url": media.youtube_link(r["youtube_url"], r["start_sec"]),
+            }
+        )
     return sources
 
 
 def build_messages(history: list[dict], question: str, sources: list[dict]) -> list[dict]:
-    context = "\n\n".join(
-        f"[{s['n']}] Video: \"{s['title']}\" @ {s['timestamp']}\n{s['text']}" for s in sources
-    ) or "(no excerpts found — the knowledge base may be empty)"
+    context = (
+        "\n\n".join(f'[{s["n"]}] Video: "{s["title"]}" @ {s["timestamp"]}\n{s["text"]}' for s in sources)
+        or "(no excerpts found — the knowledge base may be empty)"
+    )
     msgs = [{"role": "system", "content": SYSTEM_PROMPT}]
     for m in history[-8:]:
         msgs.append({"role": m["role"], "content": m["content"]})
-    msgs.append({
-        "role": "user",
-        "content": f"Transcript excerpts:\n\n{context}\n\n---\nQuestion: {question}",
-    })
+    msgs.append(
+        {
+            "role": "user",
+            "content": f"Transcript excerpts:\n\n{context}\n\n---\nQuestion: {question}",
+        }
+    )
     return msgs
 
 

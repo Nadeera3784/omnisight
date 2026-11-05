@@ -45,7 +45,13 @@ export type Conversation = {
   messages?: Message[];
 };
 
-export type TranscriptChunk = { start: number; end: number; timestamp: string; text: string; youtube_url: string | null };
+export type TranscriptChunk = {
+  start: number;
+  end: number;
+  timestamp: string;
+  text: string;
+  youtube_url: string | null;
+};
 
 const TOKEN_KEY = "omnisight_token";
 

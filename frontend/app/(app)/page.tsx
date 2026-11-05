@@ -76,7 +76,7 @@ function UploadPanel({ onAdded }: { onAdded: () => void }) {
               if (f) setFile(f);
             }}
             className={cn(
-              "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground transition-colors hover:border-primary hover:bg-accent/50",
+              "text-muted-foreground hover:border-primary hover:bg-accent/50 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-8 text-center text-sm transition-colors",
               dragging && "border-primary bg-accent/50",
             )}
           >
@@ -89,23 +89,33 @@ function UploadPanel({ onAdded }: { onAdded: () => void }) {
             />
             <Upload className="size-6" />
             {file ? (
-              <span className="font-medium text-foreground">
+              <span className="text-foreground font-medium">
                 {file.name} <span className="text-muted-foreground">({(file.size / 1e6).toFixed(1)} MB)</span>
               </span>
             ) : (
               <span>
-                <span className="font-medium text-foreground">Choose a video</span> or drag it here
+                <span className="text-foreground font-medium">Choose a video</span> or drag it here
               </span>
             )}
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="title">Title (optional)</Label>
-              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Defaults to the file name" />
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Defaults to the file name"
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="yt">YouTube URL (optional)</Label>
-              <Input id="yt" value={ytUrl} onChange={(e) => setYtUrl(e.target.value)} placeholder="Timestamps will open YouTube" />
+              <Input
+                id="yt"
+                value={ytUrl}
+                onChange={(e) => setYtUrl(e.target.value)}
+                placeholder="Timestamps will open YouTube"
+              />
             </div>
           </div>
           {progress !== null && <Progress value={progress} />}
@@ -130,7 +140,13 @@ function UploadPanel({ onAdded }: { onAdded: () => void }) {
 export default function LibraryPage() {
   const [videos, setVideos] = useState<Video[] | null>(null);
 
-  const load = useCallback(() => api<Video[]>("/videos").then(setVideos).catch(() => {}), []);
+  const load = useCallback(
+    () =>
+      api<Video[]>("/videos")
+        .then(setVideos)
+        .catch(() => {}),
+    [],
+  );
 
   useEffect(() => {
     load();
@@ -164,7 +180,8 @@ export default function LibraryPage() {
 
         <section className="grid gap-4">
           <h2 className="text-lg font-semibold">
-            Your videos {videos && videos.length > 0 && <span className="text-muted-foreground">({videos.length})</span>}
+            Your videos{" "}
+            {videos && videos.length > 0 && <span className="text-muted-foreground">({videos.length})</span>}
           </h2>
           {videos === null ? (
             <div className="grid gap-2">
@@ -173,7 +190,7 @@ export default function LibraryPage() {
               ))}
             </div>
           ) : videos.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed p-12 text-center text-muted-foreground">
+            <div className="text-muted-foreground flex flex-col items-center gap-2 rounded-xl border border-dashed p-12 text-center">
               <Film className="size-8" />
               No videos yet. Upload one above to build your knowledge base.
             </div>

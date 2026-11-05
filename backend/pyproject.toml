@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, import sorting, bugbear, pyupgrade, simplify
+select = ["E", "W", "F", "I", "B", "UP", "SIM"]
+# FastAPI's Depends()/File() defaults are idiomatic
+ignore = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]

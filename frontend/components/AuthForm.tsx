@@ -42,13 +42,15 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   const isLogin = mode === "login";
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-4">
+    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-4">
       <Brand className="text-lg" />
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">{isLogin ? "Welcome back" : "Create your account"}</CardTitle>
           <CardDescription>
-            {isLogin ? "Sign in to chat with your video library." : "Upload videos and turn them into a searchable knowledge base."}
+            {isLogin
+              ? "Sign in to chat with your video library."
+              : "Upload videos and turn them into a searchable knowledge base."}
           </CardDescription>
         </CardHeader>
         <form onSubmit={onSubmit}>
@@ -94,9 +96,12 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
               {busy && <Loader2 className="animate-spin" />}
               {isLogin ? "Sign in" : "Create account"}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-center text-sm">
               {isLogin ? "No account? " : "Already have an account? "}
-              <Link href={isLogin ? "/register" : "/login"} className="font-medium text-primary underline-offset-4 hover:underline">
+              <Link
+                href={isLogin ? "/register" : "/login"}
+                className="text-primary font-medium underline-offset-4 hover:underline"
+              >
                 {isLogin ? "Register" : "Sign in"}
               </Link>
             </p>

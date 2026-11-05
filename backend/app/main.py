@@ -37,6 +37,7 @@ def health():
 
 # ---------- Auth ----------
 
+
 class RegisterIn(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     email: EmailStr
@@ -85,6 +86,7 @@ def me(user=Depends(current_user)):
 
 # ---------- Videos ----------
 
+
 def _video_out(v: dict) -> dict:
     return {
         "id": str(v["id"]),
@@ -101,9 +103,7 @@ def _video_out(v: dict) -> dict:
 
 
 def _get_video(conn, video_id: str, user_id) -> dict:
-    v = conn.execute(
-        "SELECT * FROM videos WHERE id = %s AND user_id = %s", (video_id, user_id)
-    ).fetchone()
+    v = conn.execute("SELECT * FROM videos WHERE id = %s AND user_id = %s", (video_id, user_id)).fetchone()
     if not v:
         raise HTTPException(404, "Video not found")
     return v
@@ -193,6 +193,7 @@ def get_transcript(video_id: uuid.UUID, user=Depends(current_user)):
 
 # ---------- Conversations ----------
 
+
 class ConversationIn(BaseModel):
     video_id: uuid.UUID | None = None
 
@@ -255,8 +256,13 @@ def get_conversation(conv_id: uuid.UUID, user=Depends(current_user)):
         ).fetchall()
     out = _conv_out(c)
     out["messages"] = [
-        {"id": m["id"], "role": m["role"], "content": m["content"], "sources": m["sources"],
-         "created_at": m["created_at"].isoformat()}
+        {
+            "id": m["id"],
+            "role": m["role"],
+            "content": m["content"],
+            "sources": m["sources"],
+            "created_at": m["created_at"].isoformat(),
+        }
         for m in msgs
     ]
     return out
@@ -319,7 +325,8 @@ def send_message(conv_id: uuid.UUID, body: MessageIn, user=Depends(current_user)
                 return
         with get_conn() as conn:
             msg = conn.execute(
-                "INSERT INTO messages (conversation_id, role, content, sources) VALUES (%s, 'assistant', %s, %s) RETURNING id",
+                "INSERT INTO messages (conversation_id, role, content, sources) "
+                "VALUES (%s, 'assistant', %s, %s) RETURNING id",
                 (conv_id, answer, Jsonb(sources)),
             ).fetchone()
         yield json.dumps({"type": "done", "message_id": msg["id"]}) + "\n"

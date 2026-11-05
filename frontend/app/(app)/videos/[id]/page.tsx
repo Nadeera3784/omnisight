@@ -78,7 +78,7 @@ function VideoDetail({ id }: { id: string }) {
   return (
     <>
       <PageHeader>
-        <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link href="/" className="text-muted-foreground hover:text-foreground text-sm">
           Library
         </Link>
         <span className="text-muted-foreground">/</span>
@@ -102,7 +102,7 @@ function VideoDetail({ id }: { id: string }) {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="grid gap-2">
               <h2 className="text-2xl font-semibold tracking-tight">{video.title}</h2>
-              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
                 <StatusBadge status={video.status} />
                 {video.duration != null && <span className="tabular-nums">{fmtDuration(video.duration)}</span>}
                 {video.youtube_url && (
@@ -199,7 +199,7 @@ function VideoDetail({ id }: { id: string }) {
               <ScrollArea className="lg:h-[calc(100svh-12rem)]">
                 <div className="grid divide-y px-4">
                   {transcript.length === 0 && (
-                    <p className="py-4 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground py-4 text-sm">
                       {video.status === "ready" ? "No transcript." : "Available once indexing finishes."}
                     </p>
                   )}
@@ -208,7 +208,7 @@ function VideoDetail({ id }: { id: string }) {
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="h-6 shrink-0 gap-1 px-2 text-xs text-primary tabular-nums"
+                        className="text-primary h-6 shrink-0 gap-1 px-2 text-xs tabular-nums"
                         onClick={() => seek(c.start)}
                         title="Play from here"
                       >

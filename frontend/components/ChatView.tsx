@@ -24,12 +24,26 @@ const SUGGESTIONS = [
 
 const ALL = "all";
 
-function TimestampLink({ source, children, className }: { source: Source; children: React.ReactNode; className?: string }) {
+function TimestampLink({
+  source,
+  children,
+  className,
+}: {
+  source: Source;
+  children: React.ReactNode;
+  className?: string;
+}) {
   const href = timestampHref(source);
   const title = `${source.title} @ ${source.timestamp}`;
   if (source.youtube_url)
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className} title={`Open on YouTube: ${title}`}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        title={`Open on YouTube: ${title}`}
+      >
         {children}
       </a>
     );
@@ -53,16 +67,16 @@ function AssistantMessage({ msg, streaming }: { msg: Message; streaming: boolean
 
   return (
     <div className="flex gap-3">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <div className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-full">
         <ScanEye className="size-4" />
       </div>
       <div className="min-w-0 flex-1 pt-1">
         {!msg.content && streaming ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <Loader2 className="size-4 animate-spin" /> Searching your videos…
           </div>
         ) : (
-          <div className="prose prose-sm max-w-none dark:prose-invert prose-p:leading-relaxed">
+          <div className="prose prose-sm dark:prose-invert prose-p:leading-relaxed max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -89,14 +103,14 @@ function AssistantMessage({ msg, streaming }: { msg: Message; streaming: boolean
         )}
         {cited.length > 0 && (
           <div className="mt-4 grid gap-2">
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Sources</p>
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Sources</p>
             {cited.map((s) => (
               <TimestampLink
                 key={s.n}
                 source={s}
-                className="flex gap-3 rounded-lg border bg-card p-3 text-sm transition-colors hover:border-primary/50 hover:bg-accent/50"
+                className="bg-card hover:border-primary/50 hover:bg-accent/50 flex gap-3 rounded-lg border p-3 text-sm transition-colors"
               >
-                <span className="flex shrink-0 items-center gap-1 font-semibold text-primary tabular-nums">
+                <span className="text-primary flex shrink-0 items-center gap-1 font-semibold tabular-nums">
                   <Play className="size-3 fill-current" /> {s.timestamp}
                 </span>
                 <span className="grid min-w-0 gap-0.5">
@@ -108,7 +122,7 @@ function AssistantMessage({ msg, streaming }: { msg: Message; streaming: boolean
                       </Badge>
                     )}
                   </span>
-                  <span className="truncate text-muted-foreground">{s.text}</span>
+                  <span className="text-muted-foreground truncate">{s.text}</span>
                 </span>
               </TimestampLink>
             ))}
@@ -119,7 +133,13 @@ function AssistantMessage({ msg, streaming }: { msg: Message; streaming: boolean
   );
 }
 
-export default function ChatView({ conversationId, initialVideoId }: { conversationId?: string; initialVideoId?: string }) {
+export default function ChatView({
+  conversationId,
+  initialVideoId,
+}: {
+  conversationId?: string;
+  initialVideoId?: string;
+}) {
   const { reload } = useConversations();
   const [convId, setConvId] = useState<string | undefined>(conversationId);
   const [conv, setConv] = useState<Conversation | null>(null);
@@ -134,7 +154,9 @@ export default function ChatView({ conversationId, initialVideoId }: { conversat
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    api<Video[]>("/videos").then((vs) => setVideos(vs.filter((v) => v.status === "ready"))).catch(() => {});
+    api<Video[]>("/videos")
+      .then((vs) => setVideos(vs.filter((v) => v.status === "ready")))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -189,8 +211,14 @@ export default function ChatView({ conversationId, initialVideoId }: { conversat
         // Update the URL without remounting so the stream keeps rendering here.
         window.history.replaceState(null, "", `/chat/${id}`);
       }
-      setConv((c) => (c && c.title === "New chat" ? { ...c, title: q.length <= 60 ? q : q.slice(0, 57).trimEnd() + "…" } : c));
-      setMessages((m) => [...m, { role: "user", content: q, sources: [] }, { role: "assistant", content: "", sources: [] }]);
+      setConv((c) =>
+        c && c.title === "New chat" ? { ...c, title: q.length <= 60 ? q : q.slice(0, 57).trimEnd() + "…" } : c,
+      );
+      setMessages((m) => [
+        ...m,
+        { role: "user", content: q, sources: [] },
+        { role: "assistant", content: "", sources: [] },
+      ]);
       const patchLast = (fn: (m: Message) => Message) =>
         setMessages((ms) => (ms.length ? [...ms.slice(0, -1), fn(ms[ms.length - 1])] : ms));
       await streamMessage(id, q, (e) => {
@@ -211,7 +239,7 @@ export default function ChatView({ conversationId, initialVideoId }: { conversat
     return (
       <>
         <PageHeader />
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
+        <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
           This chat doesn&apos;t exist.
           <Button asChild>
             <Link href="/chat">Start a new chat</Link>
@@ -229,7 +257,9 @@ export default function ChatView({ conversationId, initialVideoId }: { conversat
   return (
     <div className="flex h-svh flex-col">
       <PageHeader>
-        <h1 className="truncate text-sm font-medium">{conv?.title && conv.title !== "New chat" ? conv.title : "New chat"}</h1>
+        <h1 className="truncate text-sm font-medium">
+          {conv?.title && conv.title !== "New chat" ? conv.title : "New chat"}
+        </h1>
         <div className="ml-auto shrink-0">
           {convId ? (
             <Badge variant="secondary" className="max-w-56">
@@ -263,16 +293,16 @@ export default function ChatView({ conversationId, initialVideoId }: { conversat
         <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6">
           {messages.length === 0 && !conversationId && (
             <div className="flex flex-col items-center gap-3 pt-[8vh] text-center">
-              <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <div className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full">
                 <Sparkles className="size-6" />
               </div>
               <h2 className="text-xl font-semibold">Ask anything about your videos</h2>
-              <p className="max-w-md text-sm text-muted-foreground">
+              <p className="text-muted-foreground max-w-md text-sm">
                 Answers cite the exact moments in your videos. Click a timestamp to jump there
                 {videos.some((v) => v.youtube_id) ? " on YouTube" : ""}.
               </p>
               {videos.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   No indexed videos yet —{" "}
                   <Link href="/" className="text-primary underline-offset-4 hover:underline">
                     add one to your library
@@ -293,7 +323,7 @@ export default function ChatView({ conversationId, initialVideoId }: { conversat
           {messages.map((m, i) =>
             m.role === "user" ? (
               <div key={i} className="flex justify-end">
-                <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm whitespace-pre-wrap text-primary-foreground [overflow-wrap:anywhere]">
+                <div className="bg-primary text-primary-foreground max-w-[80%] rounded-2xl rounded-br-sm px-4 py-2.5 text-sm [overflow-wrap:anywhere] whitespace-pre-wrap">
                   {m.content}
                 </div>
               </div>
@@ -314,7 +344,7 @@ export default function ChatView({ conversationId, initialVideoId }: { conversat
       <div className="mx-auto w-full max-w-3xl px-4 pb-4">
         <form
           className={cn(
-            "flex items-end gap-2 rounded-2xl border bg-background p-2 shadow-sm transition-shadow focus-within:ring-[3px] focus-within:ring-ring/30",
+            "bg-background focus-within:ring-ring/30 flex items-end gap-2 rounded-2xl border p-2 shadow-sm transition-shadow focus-within:ring-[3px]",
           )}
           onSubmit={(e) => {
             e.preventDefault();
@@ -336,11 +366,17 @@ export default function ChatView({ conversationId, initialVideoId }: { conversat
             }}
             autoFocus
           />
-          <Button type="submit" size="icon" className="shrink-0 rounded-xl" disabled={sending || !input.trim()} aria-label="Send">
+          <Button
+            type="submit"
+            size="icon"
+            className="shrink-0 rounded-xl"
+            disabled={sending || !input.trim()}
+            aria-label="Send"
+          >
             {sending ? <Loader2 className="animate-spin" /> : <ArrowUp />}
           </Button>
         </form>
-        <p className="mt-2 text-center text-xs text-muted-foreground">Enter to send · Shift+Enter for a new line</p>
+        <p className="text-muted-foreground mt-2 text-center text-xs">Enter to send · Shift+Enter for a new line</p>
       </div>
     </div>
   );

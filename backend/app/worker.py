@@ -1,4 +1,5 @@
 """Background ingestion worker: polls for pending videos and builds the knowledge base."""
+
 import logging
 import os
 import tempfile
@@ -43,10 +44,12 @@ def build_chunks(segments: list[dict]) -> list[dict]:
 
 def summarize(title: str, segments: list[dict]) -> str:
     transcript = " ".join(s["text"] for s in segments)[:16000]
-    return ai.complete([
-        {"role": "system", "content": "Summarize this video transcript in 2-3 sentences. Plain text, no preamble."},
-        {"role": "user", "content": f"Title: {title}\n\nTranscript:\n{transcript}"},
-    ]).strip()
+    return ai.complete(
+        [
+            {"role": "system", "content": "Summarize this video transcript in 2-3 sentences. Plain text, no preamble."},
+            {"role": "user", "content": f"Title: {title}\n\nTranscript:\n{transcript}"},
+        ]
+    ).strip()
 
 
 def process(video: dict):
@@ -87,7 +90,7 @@ def process(video: dict):
             with conn.cursor() as cur:
                 cur.executemany(
                     "INSERT INTO chunks (video_id, start_sec, end_sec, text, embedding) VALUES (%s, %s, %s, %s, %s)",
-                    [(vid, c["start"], c["end"], c["text"], v) for c, v in zip(chunks, vectors)],
+                    [(vid, c["start"], c["end"], c["text"], v) for c, v in zip(chunks, vectors, strict=True)],
                 )
 
         summary = summarize(video["title"], segments)

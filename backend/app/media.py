@@ -1,13 +1,12 @@
 """FFmpeg helpers and YouTube link building."""
+
 import glob
 import json
 import os
 import re
 import subprocess
 
-YOUTUBE_ID_RE = re.compile(
-    r"(?:youtube\.com/(?:watch\?(?:.*&)?v=|embed/|shorts/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})"
-)
+YOUTUBE_ID_RE = re.compile(r"(?:youtube\.com/(?:watch\?(?:.*&)?v=|embed/|shorts/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})")
 # yt-dlp's default output template ends with " [VIDEO_ID].ext"
 FILENAME_ID_RE = re.compile(r"\[([A-Za-z0-9_-]{11})\]")
 
@@ -44,19 +43,52 @@ def probe_duration(path: str) -> float:
 
 
 def make_thumbnail(path: str, out_path: str, at: float) -> None:
-    _run([
-        "ffmpeg", "-y", "-loglevel", "error", "-ss", f"{at:.2f}", "-i", path,
-        "-frames:v", "1", "-vf", "scale=640:-2", "-q:v", "4", out_path,
-    ])
+    _run(
+        [
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-ss",
+            f"{at:.2f}",
+            "-i",
+            path,
+            "-frames:v",
+            "1",
+            "-vf",
+            "scale=640:-2",
+            "-q:v",
+            "4",
+            out_path,
+        ]
+    )
 
 
 def extract_audio_segments(path: str, out_dir: str, segment_seconds: int = 600) -> list[str]:
     """Mono 16 kHz 32 kbps MP3, split so each piece stays well under Whisper's 25 MB limit."""
     pattern = os.path.join(out_dir, "audio_%04d.mp3")
-    _run([
-        "ffmpeg", "-y", "-loglevel", "error", "-i", path, "-vn", "-ac", "1", "-ar", "16000",
-        "-b:a", "32k", "-f", "segment", "-segment_time", str(segment_seconds),
-        "-reset_timestamps", "1", pattern,
-    ])
+    _run(
+        [
+            "ffmpeg",
+            "-y",
+            "-loglevel",
+            "error",
+            "-i",
+            path,
+            "-vn",
+            "-ac",
+            "1",
+            "-ar",
+            "16000",
+            "-b:a",
+            "32k",
+            "-f",
+            "segment",
+            "-segment_time",
+            str(segment_seconds),
+            "-reset_timestamps",
+            "1",
+            pattern,
+        ]
+    )
     return sorted(glob.glob(os.path.join(out_dir, "audio_*.mp3")))
-

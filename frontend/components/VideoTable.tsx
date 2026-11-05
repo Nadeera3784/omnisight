@@ -54,7 +54,7 @@ export default function VideoTable({ videos, onDelete }: { videos: Video[]; onDe
 
   return (
     <div className="grid gap-4">
-      <div className="overflow-hidden rounded-xl border bg-card">
+      <div className="bg-card overflow-hidden rounded-xl border">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -72,12 +72,14 @@ export default function VideoTable({ videos, onDelete }: { videos: Video[]; onDe
                   <div className="flex items-center gap-3">
                     <Link
                       href={`/videos/${v.id}`}
-                      className="relative hidden aspect-video w-24 shrink-0 overflow-hidden rounded-md bg-muted sm:block"
+                      className="bg-muted relative hidden aspect-video w-24 shrink-0 overflow-hidden rounded-md sm:block"
                     >
                       {v.thumbnail_url ? (
+                        // Presigned RustFS URLs expire, so next/image optimisation doesn't apply
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={v.thumbnail_url} alt="" className="absolute inset-0 size-full object-cover" />
                       ) : (
-                        <span className="flex size-full items-center justify-center text-muted-foreground">
+                        <span className="text-muted-foreground flex size-full items-center justify-center">
                           <Film className="size-5" />
                         </span>
                       )}
@@ -94,12 +96,12 @@ export default function VideoTable({ videos, onDelete }: { videos: Video[]; onDe
                         )}
                       </div>
                       {v.status === "error" ? (
-                        <span className="truncate text-xs text-destructive" title={v.error ?? ""}>
+                        <span className="text-destructive truncate text-xs" title={v.error ?? ""}>
                           {v.error}
                         </span>
                       ) : (
                         v.summary && (
-                          <span className="truncate text-xs text-muted-foreground" title={v.summary}>
+                          <span className="text-muted-foreground truncate text-xs" title={v.summary}>
                             {v.summary}
                           </span>
                         )
@@ -110,11 +112,15 @@ export default function VideoTable({ videos, onDelete }: { videos: Video[]; onDe
                 <TableCell>
                   <StatusBadge status={v.status} />
                 </TableCell>
-                <TableCell className="hidden text-muted-foreground tabular-nums md:table-cell">
+                <TableCell className="text-muted-foreground hidden tabular-nums md:table-cell">
                   {v.duration != null ? fmtDuration(v.duration) : "—"}
                 </TableCell>
-                <TableCell className="hidden text-muted-foreground md:table-cell">
-                  {new Date(v.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
+                <TableCell className="text-muted-foreground hidden md:table-cell">
+                  {new Date(v.created_at).toLocaleDateString(undefined, {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 </TableCell>
                 <TableCell className="pr-4">
                   <div className="flex justify-end gap-1">
@@ -133,7 +139,7 @@ export default function VideoTable({ videos, onDelete }: { videos: Video[]; onDe
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-8 text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive size-8"
                         aria-label="Delete video"
                         title="Delete video"
                       >
@@ -149,7 +155,7 @@ export default function VideoTable({ videos, onDelete }: { videos: Video[]; onDe
       </div>
 
       <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Showing {start + 1}–{start + rows.length} of {videos.length}
         </p>
         {pageCount > 1 && (
